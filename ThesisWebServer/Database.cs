@@ -2,9 +2,11 @@
 using MongoDB.Driver;
 using Nancy.Json;
 using Nancy.ViewEngines.SuperSimpleViewEngine;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -13,11 +15,23 @@ using System.Threading.Tasks;
 
 namespace ThesisWebServer
 {
+
+
     public struct WebsiteResult
     {
-        public string domain;
-        public string mainDomain;
-        public string screenshotPath;
+        public string Id { get; set; }
+        public int IdValue { get; set; }
+        public DateTime Timestamp { get; set; }
+        public string MainDomain { get; set; }
+        public string Domain { get; set; }
+        public SslCert SslCert { get; set; }
+        public List<string> AInfo { get; set; }
+        public List<string> AaaaInfo { get; set; }
+        public List<string> CnameInfo { get; set; }
+        public List<string> MxInfo { get; set; }
+        public Dictionary<string, string> WhoisInfo { get; set; }
+        public string ScreenshotFilePath { get; set; }
+        public Dictionary<string, double> Clock { get; set; }
     }
     
     public struct MongoDBConfig
@@ -64,7 +78,12 @@ namespace ThesisWebServer
 
         public async Task<List<BsonDocument>> GetDocuments()
         {
-            var filter = Builders<BsonDocument>.Filter.Ne<string?>("screenshot_file_path", null);
+            List<FilterDefinition<BsonDocument>> and = new()
+            {
+                Builders<BsonDocument>.Filter.Ne<string?>("screenshot_file_path", null)
+            };
+
+            var filter = Builders<BsonDocument>.Filter.Empty; //Builders<BsonDocument>.Filter.And(and);
             IAsyncCursor<BsonDocument> k = await col.FindAsync<BsonDocument>(filter);
             return k.ToList();
         }
