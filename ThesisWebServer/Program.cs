@@ -5,6 +5,7 @@ using System.Text;
 using ThesisWebServer;
 using Newtonsoft.Json;
 using Nancy.Hosting.Self;
+using Nancy;
 
 public class Program
 {
@@ -41,14 +42,26 @@ public class Program
         Start();
         //WebServer ws = new WebServer();
 
-        Uri uri = new("http://localhost:8080");
+        string localhost = (argv.Length > 0) ? argv[0] : "127.0.0.1";
+        string port = (argv.Length > 1) ? argv[1] : "8080";
+
+        Uri uri = new($"http://{localhost}:{port}");
         HostConfiguration hostConfigs = new();
         hostConfigs.UrlReservations.CreateAutomatically = true;
         hostConfigs.RewriteLocalhost = true;
-        using (var _server = new NancyHost(hostConfigs, uri))
+
+        using var _server = new NancyHost(hostConfigs, uri);
+        
+        if (_server == null)
         {
-            _server.Start();
-            Console.WriteLine("NancyFX Host has started. Press Enter to stop.");
+            Console.WriteLine("Server is null.");
+            return;
+        }
+
+        _server.Start();
+        Console.WriteLine("NancyFX Host has started. Press Ctrl+C to stop.");
+        while(true)
+        {
             Console.ReadLine();
         }
     }
